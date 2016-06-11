@@ -1,0 +1,7 @@
+{
+    "vendor": "Foh",
+    "name": "SystemAccount",
+    "description": "Standard user management for honeyquip.",
+    "namespace": "Honeybee\\Frameworkbinding\\Equip",
+    "route_prefix": "foh/system_account"
+}

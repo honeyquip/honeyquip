@@ -1,0 +1,9 @@
+---
+app_name: honeyquip
+app_description: Cqrs and es app boilerplate based on equip
+
+plates:
+  directory: %core_dir%/templates
+
+crates:
+  Foh\SystemAccount\SystemAccountCrate: /user
