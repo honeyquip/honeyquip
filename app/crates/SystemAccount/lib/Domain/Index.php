@@ -16,11 +16,16 @@ class Index implements DomainInterface
 
     public function __invoke(array $input)
     {
+        $name = 'world';
+        if (!empty($input['name'])) {
+            $name = $input['name'];
+        }
+
         return $this->payload
             ->withStatus(PayloadInterface::STATUS_OK)
             ->withSetting('template', 'hello')
             ->withOutput([
-                'name' => __METHOD__
+                'name' => "user::".$name
             ]);
     }
 }

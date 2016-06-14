@@ -11,7 +11,7 @@ class SystemAccountCrate extends Crate
     public function configure(Injector $injector)
     {
         $this->routes = [
-            'GET /hello' => Index::class
+            'GET /hello[/{name}]' => Index::class
         ];
     }
 }

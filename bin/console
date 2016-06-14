@@ -1,0 +1,57 @@
+#!/usr/bin/env php
+<?php
+
+use Auryn\Injector;
+use Equip\Configuration\ConfigurationSet;
+use Honeybee\FrameworkBinding\Equip\Console\App;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\CrateInfo;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\ListCrates;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\MakeCrate;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\RemoveCrate;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\ListTargets;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateDown;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateUp;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\TargetInfo;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\GenerateCode;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ListResources;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\MakeResource;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\RemoveResource;
+use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ResourceInfo;
+use Symfony\Component\Console\Input\ArgvInput;
+
+$appContext = 'console';
+$localConfigDir = getenv('LOCAL_CONFIG_DIR') ?: '/usr/local/honeylex.local/';
+$appCommands = [
+    // Crate
+    CrateInfo::CLASS,
+    ListCrates::CLASS,
+    MakeCrate::CLASS,
+    RemoveCrate::CLASS,
+    // Migrate
+  /*  ListTargets::CLASS,
+    MigrateDown::CLASS,
+    MigrateUp::CLASS,
+    TargetInfo::CLASS,
+    // Resource
+    GenerateCode::CLASS,
+    ListResources::CLASS,
+    MakeResource::CLASS,
+    RemoveResource::CLASS,
+    ResourceInfo::CLASS, */
+];
+
+require_once __DIR__.'/../vendor/autoload.php';
+
+set_time_limit(0);
+
+$appEnv = (new ArgvInput)->getParameterOption([ '--env', '-e' ], getenv('APP_ENV') ?: 'dev');
+
+$app = new App($appCommands, new Injector, new ConfigurationSet([
+    Equip\Configuration\AurynConfiguration::class,
+    Equip\Configuration\DiactorosConfiguration::class,
+    Equip\Configuration\EnvConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\ConfigBagConfiguration::class,
+    Equip\Configuration\MonologConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class
+]));
+$app->run();
