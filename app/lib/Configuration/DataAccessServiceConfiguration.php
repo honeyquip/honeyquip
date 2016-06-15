@@ -60,17 +60,13 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
         ]
     ];
 
-    protected static $defaultQueryServices = [];
-
-    protected static $defaultUows = [];
-
     public function apply(Injector $injector)
     {
         $injector->delegate(
             StorageReaderMap::CLASS,
             function (ConnectorServiceInterface $connectors, array $storageReaders = []) use ($injector) {
                 $configs = array_merge(self::$defaultReaders, $storageReaders);
-                return $this->initStorageMap(new StorageReaderMap, self::$defaultReaders, $connectors, $injector);
+                return $this->initStorageMap(new StorageReaderMap, $configs, $connectors, $injector);
             }
         )->share(StorageReaderMap::CLASS);
         $injector->delegate(
@@ -97,18 +93,19 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
 
     public function initStorageMap(Map $map, array $configs, ConnectorServiceInterface $connectors, Injector $injector)
     {
-        foreach ($configs as $key => $config) {
+        foreach ($configs as $mapKey => $config) {
             $storageState = [
                 ':config' => new ArrayConfig(isset($config['settings']) ? $config['settings'] : []),
                 ':connector' => $connectors->getConnector($config['connection'])
             ];
             if (isset($config['dependencies'])) {
-                foreach ($config['dependencies'] as $key => $dependency) {
-                    $storageState[$key] = $dependency;
+                foreach ($config['dependencies'] as $depKey => $dependency) {
+                    $storageState[$depKey] = $dependency;
                 }
             }
-            $map->setItem($key, $injector->make($config['class'], $storageState));
+            $map->setItem($mapKey, $injector->make($config['class'], $storageState));
         }
+
         return $map;
     }
 
@@ -116,9 +113,13 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
     {
         $injector->delegate(
             UnitOfWorkMap::CLASS,
-            function (StorageWriterMap $storageWriterMap, StorageReaderMap $storageReaderMap) use ($injector) {
+            function (
+                StorageWriterMap $storageWriterMap,
+                StorageReaderMap $storageReaderMap,
+                array $unitOfWorks = []
+            ) use ($injector) {
                 $map = new UnitOfWorkMap;
-                foreach (self::$defaultUows as $uowKey => $uowConf) {
+                foreach ($unitOfWorks as $uowKey => $uowConf) {
                     $objectState = [
                         ':config' => new ArrayConfig(isset($uowConf['settings']) ? $uowConf['settings'] : []),
                         ':event_reader' => $storageReaderMap->getItem($uowConf['event_reader']),
@@ -140,9 +141,9 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
     {
         $injector->delegate(
             QueryServiceMap::CLASS,
-            function (FinderMap $finderMap) use ($injector) {
+            function (FinderMap $finderMap, array $queryServices = []) use ($injector) {
                 $queryServiceMap = new QueryServiceMap;
-                foreach (self::$defaultQueryServices as $serviceKey => $qsConf) {
+                foreach ($queryServices as $serviceKey => $qsConf) {
                     $finderMappings = [];
                     foreach ($qsConf['finder_mappings'] as $finderMappingName => $finderMapping) {
                         $finderMappings[$finderMappingName] = [

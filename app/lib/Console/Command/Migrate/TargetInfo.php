@@ -46,13 +46,9 @@ class TargetInfo extends MigrateCommand
         $output->writeln('active: '.($migrationTarget->isActivated() ? 'true' : 'false'));
 
         $output->writeln('pending migrations:'.($pending->getSize() === 0  ? ' none' : ''));
-        foreach ($pending as $pendingMigration) {
-            $this->printMigrations($pending, $output);
-        }
+        $this->printMigrations($pending, $output);
         $output->writeln('executed migrations:'.($executed->getSize() === 0 ? ' none' : ''));
-        foreach ($executed as $executedMigration) {
-            $this->printMigrations($executed, $output);
-        }
+        $this->printMigrations($executed, $output);
     }
 
     protected function printMigrations(MigrationList $migrations, OutputInterface $output)

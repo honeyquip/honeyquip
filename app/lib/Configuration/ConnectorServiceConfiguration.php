@@ -66,12 +66,12 @@ class ConnectorServiceConfiguration implements ConfigurationInterface
             ->share(ConnectorMap::class)
             ->prepare(
                 ConnectorMap::class,
-                function (ConnectorMap $map, Injector $injector) {
+                function (ConnectorMap $map) use ($injector) {
                     $injector->execute([ $this, 'registerConnectors' ], [ ':connectorMap' => $map ]);
                 }
             );
 
-        return $injector
+        $injector
             ->define(ConnectorService::class, [])
             ->share(ConnectorService::class)
             ->alias(ConnectorServiceInterface::class, ConnectorService::class);

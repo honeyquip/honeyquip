@@ -16,4 +16,8 @@ interface CrateInterface
     public function configure(Injector $injector);
 
     public function dispatch(ServerRequestInterface $request);
+
+    public function getAggregateRootTypes();
+
+    public function getProjectionTypes();
 }

@@ -2,14 +2,11 @@
 
 namespace Honeybee\FrameworkBinding\Equip\Console\Command\Resource;
 
-use Honeybee\Common\Util\StringToolkit;
-use Honeybee\FrameworkBinding\Equip\Config\ConfigProviderInterface;
-use Honeybee\FrameworkBinding\Equip\Console\Scafold\SkeletonGenerator;
+use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBagInterface;
+use Honeybee\FrameworkBinding\Equip\Crate\CrateMap;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Trellis\CodeGen\Parser\Schema\EntityTypeSchemaXmlParser;
 
@@ -17,11 +14,13 @@ class ListResources extends ResourceCommand
 {
     protected $fileFinder;
 
-    public function __construct(
-        ConfigProviderInterface $configBag,
-        Finder $fileFinder
-    ) {
+    protected $crateMap;
+
+    public function __construct(ConfigBagInterface $configBag, CrateMap $crateMap, Finder $fileFinder)
+    {
         parent::__construct($configBag);
+
+        $this->crateMap = $crateMap;
         $this->fileFinder = $fileFinder;
     }
 
@@ -43,10 +42,10 @@ class ListResources extends ResourceCommand
         if ($cratePrefix) {
             $crates = [ $cratePrefix ];
         } else {
-            $crates = $this->configBag->getCrateMap()->getKeys();
+            $crates = $this->crateMap->getKeys();
         }
         foreach ($crates as $cratePrefix) {
-            $crate = $this->configBag->getCrateMap()->getItem($cratePrefix);
+            $crate = $this->crateMap->getItem($cratePrefix);
             $finder = clone $this->fileFinder;
             $foundSchemas = $finder->in($crate->getRootDir())->name('aggregate_root.xml');
             $output->writeln($crate->getVendor().'/'.$crate->getName());

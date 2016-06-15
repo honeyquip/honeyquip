@@ -28,7 +28,7 @@ $appCommands = [
     MakeCrate::CLASS,
     RemoveCrate::CLASS,
     // Migrate
-  /*  ListTargets::CLASS,
+    ListTargets::CLASS,
     MigrateDown::CLASS,
     MigrateUp::CLASS,
     TargetInfo::CLASS,
@@ -37,7 +37,7 @@ $appCommands = [
     ListResources::CLASS,
     MakeResource::CLASS,
     RemoveResource::CLASS,
-    ResourceInfo::CLASS, */
+    ResourceInfo::CLASS
 ];
 
 require_once __DIR__.'/../vendor/autoload.php';
@@ -52,6 +52,11 @@ $app = new App($appCommands, new Injector, new ConfigurationSet([
     Equip\Configuration\EnvConfiguration::class,
     Honeybee\FrameworkBinding\Equip\Configuration\ConfigBagConfiguration::class,
     Equip\Configuration\MonologConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class
+    Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\AggregateRootTypeMapConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\ProjectionTypeMapConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
+    Honeybee\FrameworkBinding\Equip\Configuration\MigrationServiceConfiguration::class
 ]));
 $app->run();

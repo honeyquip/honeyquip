@@ -8,6 +8,8 @@ use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBagInterface;
 use Honeybee\FrameworkBinding\Equip\Crate\CrateManifest;
 use Honeybee\FrameworkBinding\Equip\Crate\CrateManifestMap;
 use Honeybee\FrameworkBinding\Equip\Crate\CrateMap;
+use Honeybee\FrameworkBinding\Equip\Crate\EntityTypeLoader;
+use Honeybee\FrameworkBinding\Equip\Crate\EntityTypeLoaderInterface;
 use ReflectionClass;
 
 class CrateConfiguration implements ConfigurationInterface
@@ -21,28 +23,36 @@ class CrateConfiguration implements ConfigurationInterface
 
     public function apply(Injector $injector)
     {
-        $injector->prepare(
-            CrateManifestMap::class,
-            function (CrateManifestMap $manifests) {
-                foreach ($this->configBag->get('crates') as $crateFqcn => $routePrefix) {
-                    $manifest = $this->loadManifest($crateFqcn);
-                    $manifests->setItem($routePrefix, $manifest);
-                }
-                return $manifests;
-            }
-        );
+        $injector
+            ->alias(EntityTypeLoaderInterface::class, EntityTypeLoader::class)
+            ->share(EntityTypeLoaderInterface::class);
 
-        $injector->prepare(
-            CrateMap::class,
-            function (CrateMap $crateMap, Injector $injector) {
-                foreach ($injector->make(CrateManifestMap::class) as $routePrefix => $manifest) {
-                    $crateClass = $manifest->getClass();
-                    $crate = new $crateClass($manifest, $routePrefix);
-                    $crateMap->setItem($manifest->getPrefix(), $crate);
-                    $crate->configure($injector);
+        $injector
+            ->prepare(
+                CrateManifestMap::class,
+                function (CrateManifestMap $manifests) {
+                    foreach ($this->configBag->get('crates') as $crateFqcn => $routePrefix) {
+                        $manifest = $this->loadManifest($crateFqcn);
+                        $manifests->setItem($routePrefix, $manifest);
+                    }
+                    return $manifests;
                 }
-            }
-        );
+            )
+            ->share(CrateManifestMap::class);
+
+        $injector
+            ->prepare(
+                CrateMap::class,
+                function (CrateMap $crateMap) use ($injector){
+                    foreach ($injector->make(CrateManifestMap::class) as $routePrefix => $manifest) {
+                        $crateClass = $manifest->getClass();
+                        $crate = $injector->make($crateClass, [ ':manifest' => $manifest, ':routePrefix' => $routePrefix ]);
+                        $crateMap->setItem($manifest->getPrefix(), $crate);
+                        $crate->configure($injector);
+                    }
+                }
+            )
+            ->share(CrateMap::class);
     }
 
     protected function loadManifest($crateFqcn)

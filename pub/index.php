@@ -15,10 +15,13 @@ Equip\Application::build()
         Honeybee\FrameworkBinding\Equip\Configuration\ConfigBagConfiguration::class,
         Equip\Configuration\MonologConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class,
-        Equip\Configuration\PayloadConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\AggregateRootTypeMapConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\ProjectionTypeMapConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\MigrationServiceConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\PlatesConfiguration::class,
+        Equip\Configuration\PayloadConfiguration::class,
         Equip\Configuration\PlatesResponderConfiguration::class,
         Equip\Configuration\RelayConfiguration::class,
         Equip\Configuration\WhoopsConfiguration::class,
@@ -33,8 +36,8 @@ Equip\Application::build()
     ])
     ->setRouting(function (Equip\Directory $directory) {
         return $directory
-            ->get('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Domain\Hello::class)
-            ->post('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Domain\Hello::class)
+            ->get('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
+            ->post('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
         ;
     })
     ->run()

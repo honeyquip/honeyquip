@@ -9,6 +9,7 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Honeybee\Common\Error\RuntimeError;
 use Honeybee\Common\Util\StringToolkit;
+use Honeybee\FrameworkBinding\Equip\Crate\EntityTypeLoaderInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 
@@ -16,22 +17,34 @@ abstract class Crate implements CrateInterface
 {
     private $manifest;
 
+    private $typeLoader;
+
     private $routePrefix;
 
-    abstract protected function provideConfiguration(Injector $injector);
+    private $aggregateRootTypeMap;
 
-    abstract protected function provideRoutes(Injector $injector);
+    private $projectionTypeMap;
 
-    public function __construct(CrateManifestInterface $manifest, $routePrefix = null)
-    {
+    abstract protected function provideConfiguration();
+
+    abstract protected function provideRoutes();
+
+    public function __construct(
+        CrateManifestInterface $manifest,
+        EntityTypeLoaderInterface $typeLoader,
+        $routePrefix = null
+    ) {
         $this->manifest = $manifest;
+        $this->typeLoader = $typeLoader;
         $this->routePrefix = $routePrefix ?: $this->getPrefix();
+        $this->aggregateRootTypeMap = $this->typeLoader->loadAggregateRootTypes($this);
+        $this->projectionTypeMap = $this->typeLoader->loadProjectionTypes($this);
     }
 
     public function configure(Injector $injector)
     {
-        $this->routes = $this->provideRoutes($injector);
-        $configs = new ConfigurationSet($this->provideConfiguration($injector));
+        $this->routes = $this->provideRoutes();
+        $configs = new ConfigurationSet($this->provideConfiguration());
         $configs->apply($injector);
     }
 
@@ -45,6 +58,16 @@ abstract class Crate implements CrateInterface
 
         // handle method not allowed
         return null;
+    }
+
+    public function getAggregateRootTypes()
+    {
+        return $this->aggregateRootTypeMap;
+    }
+
+    public function getProjectionTypes()
+    {
+        return $this->projectionTypeMap;
     }
 
     public function getManifest()
