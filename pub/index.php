@@ -16,6 +16,8 @@ Equip\Application::build()
         Equip\Configuration\MonologConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class,
         Equip\Configuration\PayloadConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\PlatesConfiguration::class,
         Equip\Configuration\PlatesResponderConfiguration::class,
         Equip\Configuration\RelayConfiguration::class,

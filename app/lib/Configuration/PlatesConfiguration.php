@@ -18,8 +18,15 @@ class PlatesConfiguration implements ConfigurationInterface
 
     public function apply(Injector $injector)
     {
-        $injector->define(Engine::class, [
-            ':directory' => $this->configBag->get('plates.directory')
-        ]);
+        $injector->delegate(
+            Engine::class,
+            function (Injector $injector, array $templateFolders = []) {
+                $platesEngine = new Engine($this->configBag->get('plates.directory'));
+                foreach ($templateFolders as $name => $folder) {
+                    $platesEngine->addFolder($name, $folder);
+                }
+                return $platesEngine;
+            }
+        );
     }
 }

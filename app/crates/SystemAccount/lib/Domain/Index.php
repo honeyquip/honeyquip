@@ -4,12 +4,13 @@ namespace Foh\SystemAccount\Domain;
 
 use Equip\Adr\DomainInterface;
 use Equip\Adr\PayloadInterface;
+use Honeybee\Infrastructure\DataAccess\DataAccessServiceInterface;
 
 class Index implements DomainInterface
 {
     private $payload;
 
-    public function __construct(PayloadInterface $payload)
+    public function __construct(PayloadInterface $payload, DataAccessServiceInterface $dbal)
     {
         $this->payload = $payload;
     }
@@ -23,7 +24,7 @@ class Index implements DomainInterface
 
         return $this->payload
             ->withStatus(PayloadInterface::STATUS_OK)
-            ->withSetting('template', 'hello')
+            ->withSetting('template', 'foh.system_account::hello')
             ->withOutput([
                 'name' => "user::".$name
             ]);

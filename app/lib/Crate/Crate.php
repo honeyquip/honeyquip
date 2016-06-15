@@ -2,6 +2,8 @@
 
 namespace Honeybee\FrameworkBinding\Equip\Crate;
 
+use Auryn\Injector;
+use Equip\Configuration\ConfigurationSet;
 use FastRoute;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -16,19 +18,26 @@ abstract class Crate implements CrateInterface
 
     private $routePrefix;
 
+    abstract protected function provideConfiguration(Injector $injector);
+
+    abstract protected function provideRoutes(Injector $injector);
+
     public function __construct(CrateManifestInterface $manifest, $routePrefix = null)
     {
         $this->manifest = $manifest;
         $this->routePrefix = $routePrefix ?: $this->getPrefix();
     }
 
+    public function configure(Injector $injector)
+    {
+        $this->routes = $this->provideRoutes($injector);
+        $configs = new ConfigurationSet($this->provideConfiguration($injector));
+        $configs->apply($injector);
+    }
+
     public function dispatch(ServerRequestInterface $request)
     {
-        $route = $this->createDispatcher()->dispatch(
-            $request->getMethod(),
-            $request->getUri()->getPath()
-        );
-
+        $route = $this->createDispatcher()->dispatch($request->getMethod(), $request->getUri()->getPath());
         $status = array_shift($route);
         if (Dispatcher::FOUND === $status) {
             return $route;

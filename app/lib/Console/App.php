@@ -13,21 +13,19 @@ class App extends Application
     public static function getLogo()
     {
         return <<<ASCII
+ _                                        _
+| |__   ___  _ __   ___ _   _  __ _ _   _(_)_ __
+| '_ \ / _ \| '_ \ / _ \ | | |/ _` | | | | | '_ \
+| | | | (_) | | | |  __/ |_| | (_| | |_| | | |_) |
+|_| |_|\___/|_| |_|\___|\__, |\__, |\__,_|_| .__/
+                        |___/    |_|       |_|
 
-/\ \                                     /\_ \
-\ \ \___     ___     ___      __   __  __\//\ \      __   __  _
- \ \  _ `\  / __`\ /' _ `\  /'__`\/\ \/\ \ \ \ \   /'__`\/\ \/'\
-  \ \ \ \ \/\ \L\ \/\ \/\ \/\  __/\ \ \_\ \ \_\ \_/\  __/\/>  </
-   \ \_\ \_\ \____/\ \_\ \_\ \____\\/`____ \/\____\ \____\/\_/\_\
-    \/_/\/_/\/___/  \/_/\/_/\/____/ `/___/> \/____/\/____/\//\/_/
-                                       /\___/
-                                       \/__/
 ASCII;
     }
 
     public function __construct(array $appCommands, Injector $injector, ConfigurationSet $configuration)
     {
-        parent::__construct('honeylex', 'dev-master');
+        parent::__construct('honeyquip', 'dev-master');
 
         $configuration->apply($injector);
 

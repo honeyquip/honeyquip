@@ -6,12 +6,13 @@ use Equip\Adr\DomainInterface;
 use Equip\Adr\PayloadInterface;
 use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBagInterface;
 use Honeybee\FrameworkBinding\Equip\Crate\CrateMap;
+use Honeybee\Infrastructure\DataAccess\Connector\ConnectorServiceInterface;
 
 class Hello implements DomainInterface
 {
     private $payload;
 
-    public function __construct(PayloadInterface $payload, CrateMap $crateMap)
+    public function __construct(PayloadInterface $payload, CrateMap $crateMap, ConnectorServiceInterface $cs)
     {
         $this->payload = $payload;
     }
