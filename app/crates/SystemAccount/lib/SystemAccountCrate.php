@@ -2,17 +2,11 @@
 
 namespace Foh\SystemAccount;
 
-use Auryn\Injector;
+use Foh\SystemAccount\Endpoint\UserDetail;
 use Foh\SystemAccount\Endpoint\UserList;
 use Foh\SystemAccount\User\Model\Task\CreateUser\CreateUserCommandHandler;
 use Foh\SystemAccount\User\Model\Task\ModifyUser\ModifyUserCommandHandler;
 use Foh\SystemAccount\User\Model\Task\ProceedUserWorkflow\ProceedUserWorkflowCommandHandler;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\CommandBusConfiguration;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\ConnectorConfiguration;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\DataAccessConfiguration;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\MigrationConfiguration;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\PlatesConfiguration;
-use Honeybee\FrameworkBinding\Equip\Configuration\Crate\ResourceTypeConfiguration;
 use Honeybee\FrameworkBinding\Equip\Crate\Crate;
 
 class SystemAccountCrate extends Crate
@@ -36,7 +30,8 @@ class SystemAccountCrate extends Crate
                     ]
                 ]);
 
-        $routes['GET /hello[/{name}]'] = UserList::class;
+        $routes['GET /collection'] = UserList::class;
+        $routes['GET /collection/{identifier}'] = UserDetail::class;
 
         return [ $routes, $configs ];
     }

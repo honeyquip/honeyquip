@@ -4,11 +4,9 @@ namespace Foh\SystemAccount\Endpoint;
 
 use Equip\Adr\DomainInterface;
 use Equip\Adr\PayloadInterface;
-use Honeybee\Infrastructure\DataAccess\Query\CriteriaList;
-use Honeybee\Infrastructure\DataAccess\Query\Query;
 use Honeybee\Infrastructure\DataAccess\Query\QueryServiceMap;
 
-class UserList implements DomainInterface
+class UserDetail implements DomainInterface
 {
     private $payload;
 
@@ -22,18 +20,13 @@ class UserList implements DomainInterface
 
     public function __invoke(array $input)
     {
-        $limit = 10;
-        $query = new Query(new CriteriaList, new CriteriaList, new CriteriaList, 0, $limit);
-        $search = $this->queryService->find($query);
+        $search = $this->queryService->findByIdentifier($input['identifier']);
 
         return $this->payload
             ->withStatus(PayloadInterface::STATUS_OK)
-            ->withSetting('template', 'foh.system_account::user_list')
+            ->withSetting('template', 'foh.system_account::user_detail')
             ->withOutput([
-                'users' => $search->getResults(),
-                'total_count' => $search->getTotalCount(),
-                'page' => ceil($search->getOffset() / $limit),
-                'pages' => ceil($search->getTotalCount() / $limit)
+                'user' => $search->getFirstResult(),
             ]);
     }
 }
