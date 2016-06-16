@@ -4,12 +4,13 @@ namespace Honeybee\FrameworkBinding\Equip\Endpoint;
 
 use Equip\Adr\DomainInterface;
 use Equip\Adr\PayloadInterface;
+use Honeybee\Infrastructure\Command\Bus\CommandBusInterface;
 
 class Hello implements DomainInterface
 {
     private $payload;
 
-    public function __construct(PayloadInterface $payload)
+    public function __construct(PayloadInterface $payload, CommandBusInterface $bus)
     {
         $this->payload = $payload;
     }

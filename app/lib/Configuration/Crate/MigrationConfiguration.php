@@ -3,12 +3,10 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Util\StringToolkit;
-use Honeybee\FrameworkBinding\Equip\Crate\CrateInterface;
 use Honeybee\Infrastructure\Migration\FileSystemLoader;
 
-class MigrationConfiguration implements ConfigurationInterface
+class MigrationConfiguration extends Configuration
 {
     protected static $defaultTargets = [
         '%crate_prefix%::migration::event_source' => [
@@ -38,17 +36,11 @@ class MigrationConfiguration implements ConfigurationInterface
         ]
     ];
 
-    protected $crate;
-
-    public function __construct(CrateInterface $crate)
-    {
-        $this->crate = $crate;
-    }
-
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $migrationTargets = []) use ($injector) {
             $migrationTargets = array_merge($migrationTargets, $this->replaceTplMarkers(self::$defaultTargets));
+            $migrationTargets = ($this->builder) ? $this->builder->build($migrationTargets) : $migrationTargets;
             $injector->defineParam('migrationTargets', $migrationTargets);
         });
     }

@@ -3,9 +3,7 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Util\StringToolkit;
-use Honeybee\FrameworkBinding\Equip\Crate\CrateInterface;
 use Honeybee\Infrastructure\DataAccess\Finder\Elasticsearch\ElasticsearchQueryTranslation;
 use Honeybee\Infrastructure\DataAccess\Finder\Elasticsearch\Projection\ProjectionFinder;
 use Honeybee\Infrastructure\DataAccess\Query\QueryService;
@@ -21,7 +19,7 @@ use Honeybee\Infrastructure\DataAccess\Storage\Elasticsearch\StructureVersionLis
 use Honeybee\Infrastructure\DataAccess\UnitOfWork\UnitOfWork;
 use Honeybee\Projection\ProjectionTypeInterface;
 
-class DataAccessConfiguration implements ConfigurationInterface
+class DataAccessConfiguration extends Configuration
 {
     protected static $defaultWriters = [
         '%crate_prefix%::version_list::event_source::writer' => [
@@ -54,7 +52,7 @@ class DataAccessConfiguration implements ConfigurationInterface
     ];
 
     protected static $defaultResourceWriters = [
-        '%res_prefix%::domain_event::event_source::writer' => [
+        '%res_prefix%::event_stream::event_source::writer' => [
             'class' => EventStreamAppender::class,
             'connection' => '%crate_prefix%.event_source'
         ],
@@ -139,98 +137,91 @@ class DataAccessConfiguration implements ConfigurationInterface
         ]
     ];
 
-    protected $crate;
-
-    public function __construct(CrateInterface $crate)
-    {
-        $this->crate = $crate;
-    }
-
     public function apply(Injector $injector)
     {
-        $this
-            ->registerStorageReaders($injector)
-            ->registerStorageWriters($injector)
-            ->registerFinders($injector)
-            ->registerUnitOfWorks($injector)
-            ->registerQueryServices($injector);
+        $injector->execute(function (array $dataAccessConfig = []) use ($injector) {
+            $dataAccessConfig['storage_readers'] = array_merge(
+                isset($dataAccessConfig['storage_readers']) ? $dataAccessConfig['storage_readers'] : [],
+                $this->getStorageReaderConfigs($injector)
+            );
+            $dataAccessConfig['storage_writers'] = array_merge(
+                isset($dataAccessConfig['storage_writers']) ? $dataAccessConfig['storage_writers'] : [],
+                $this->getStorageWriterConfigs($injector)
+            );
+            $dataAccessConfig['finders'] = array_merge(
+                isset($dataAccessConfig['finders']) ? $dataAccessConfig['finders'] : [],
+                $this->getFinderConfigs($injector)
+            );
+            $dataAccessConfig['query_services'] = array_merge(
+                isset($dataAccessConfig['query_services']) ? $dataAccessConfig['query_services'] : [],
+                $this->getQueryServiceConfigs($injector)
+            );
+            $dataAccessConfig['unit_of_works'] = array_merge(
+                isset($dataAccessConfig['unit_of_works']) ? $dataAccessConfig['unit_of_works'] : [],
+                $this->getUnitOfWorkConfigs($injector)
+            );
+            $injector->defineParam('dataAccessConfig', $dataAccessConfig);
+        });
     }
 
-    protected function registerStorageReaders(Injector $injector)
+    protected function getStorageReaderConfigs(Injector $injector)
     {
-        $injector->execute(function (array $storageReaders = []) use ($injector) {
-            $storageReaders = array_merge($storageReaders, $this->replaceTplMarkers(self::$defaultReaders));
-            foreach ($this->crate->getProjectionTypes() as $projectionType) {
-                $storageReaders = array_merge(
-                    $storageReaders,
-                    $this->replaceTplMarkers(self::$defaultResourceReaders, $projectionType)
-                );
-            }
-            $injector->defineParam('storageReaders', $storageReaders);
-        });
-
-        return $this;
+        $storageReaders = $this->replaceTplMarkers(self::$defaultReaders);
+        foreach ($this->crate->getProjectionTypes() as $projectionType) {
+            $storageReaders = array_merge(
+                $storageReaders,
+                $this->replaceTplMarkers(self::$defaultResourceReaders, $projectionType)
+            );
+        }
+        return $storageReaders;
     }
 
-    protected function registerStorageWriters(Injector $injector)
+    protected function getStorageWriterConfigs(Injector $injector)
     {
-        $injector->execute(function (array $storageWriters = []) use ($injector) {
-            $storageWriters = array_merge($storageWriters, $this->replaceTplMarkers(self::$defaultWriters));
-            foreach ($this->crate->getProjectionTypes() as $projectionType) {
-                $storageWriters = array_merge(
-                    $storageWriters,
-                    $this->replaceTplMarkers(self::$defaultResourceWriters, $projectionType)
-                );
-            }
-            $injector->defineParam('storageWriters', $storageWriters);
-        });
-
-        return $this;
+        $storageWriters = $this->replaceTplMarkers(self::$defaultWriters);
+        foreach ($this->crate->getProjectionTypes() as $projectionType) {
+            $storageWriters = array_merge(
+                $storageWriters,
+                $this->replaceTplMarkers(self::$defaultResourceWriters, $projectionType)
+            );
+        }
+        return $storageWriters;
     }
 
-    protected function registerFinders(Injector $injector)
+    protected function getFinderConfigs(Injector $injector)
     {
-        $injector->execute(function (array $finders = []) use ($injector) {
-            foreach ($this->crate->getProjectionTypes() as $projectionType) {
-                $finders = array_merge(
-                    $finders,
-                    $this->replaceTplMarkers(self::$defaultResourceFinders, $projectionType)
-                );
-            }
-            $injector->defineParam('finders', $finders);
-        });
-
-        return $this;
+        $finders = [];
+        foreach ($this->crate->getProjectionTypes() as $projectionType) {
+            $finders = array_merge(
+                $finders,
+                $this->replaceTplMarkers(self::$defaultResourceFinders, $projectionType)
+            );
+        }
+        return $finders;
     }
 
-    protected function registerQueryServices(Injector $injector)
+    protected function getQueryServiceConfigs(Injector $injector)
     {
-        $injector->execute(function (array $queryServices = []) use ($injector) {
-            foreach ($this->crate->getProjectionTypes() as $projectionType) {
-                $queryServices = array_merge(
-                    $queryServices,
-                    $this->replaceTplMarkers(self::$defaultResourceQueryServices, $projectionType)
-                );
-            }
-            $injector->defineParam('queryServices', $queryServices);
-        });
-
-        return $this;
+        $queryServices = [];
+        foreach ($this->crate->getProjectionTypes() as $projectionType) {
+            $queryServices = array_merge(
+                $queryServices,
+                $this->replaceTplMarkers(self::$defaultResourceQueryServices, $projectionType)
+            );
+        }
+        return $queryServices;
     }
 
-    protected function registerUnitOfWorks(Injector $injector)
+    protected function getUnitOfWorkConfigs(Injector $injector)
     {
-        $injector->execute(function (array $unitOfWorks = []) use ($injector) {
-            foreach ($this->crate->getProjectionTypes() as $projectionType) {
-                $unitOfWorks = array_merge(
-                    $unitOfWorks,
-                    $this->replaceTplMarkers(self::$defaultResourceUows, $projectionType)
-                );
-            }
-            $injector->defineParam('unitOfWorks', $unitOfWorks);
-        });
-
-        return $this;
+        $unitOfWorks = [];
+        foreach ($this->crate->getProjectionTypes() as $projectionType) {
+            $unitOfWorks = array_merge(
+                $unitOfWorks,
+                $this->replaceTplMarkers(self::$defaultResourceUows, $projectionType)
+            );
+        }
+        return $unitOfWorks;
     }
 
     protected function replaceTplMarkers(array $config, ProjectionTypeInterface $projectionType = null)

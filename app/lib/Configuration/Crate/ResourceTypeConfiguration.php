@@ -3,18 +3,9 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
-use Honeybee\FrameworkBinding\Equip\Crate\CrateInterface;
 
-class ResourceTypeConfiguration implements ConfigurationInterface
+class ResourceTypeConfiguration extends Configuration
 {
-    protected $crate;
-
-    public function __construct(CrateInterface $crate)
-    {
-        $this->crate = $crate;
-    }
-
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $aggregateRootTypes = []) use ($injector) {

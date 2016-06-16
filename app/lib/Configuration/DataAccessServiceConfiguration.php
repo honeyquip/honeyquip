@@ -64,25 +64,32 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
     {
         $injector->delegate(
             StorageReaderMap::CLASS,
-            function (ConnectorServiceInterface $connectors, array $storageReaders = []) use ($injector) {
-                $configs = array_merge(self::$defaultReaders, $storageReaders);
-                return $this->initStorageMap(new StorageReaderMap, $configs, $connectors, $injector);
+            function (ConnectorServiceInterface $connectors, array $dataAccessConfig = []) use ($injector) {
+                $storageReaders = isset($dataAccessConfig['storage_readers'])
+                    ? $dataAccessConfig['storage_readers']
+                    : [];
+                $storageReaders = array_merge(self::$defaultReaders, $storageReaders);
+                return $this->initStorageMap(new StorageReaderMap, $storageReaders, $connectors, $injector);
             }
         )->share(StorageReaderMap::CLASS);
         $injector->delegate(
             StorageWriterMap::CLASS,
-            function (ConnectorServiceInterface $connectors, array $storageWriters = []) use ($injector) {
-                $configs = array_merge(self::$defaultWriters, $storageWriters);
-                return $this->initStorageMap(new StorageWriterMap, $configs, $connectors, $injector);
+            function (ConnectorServiceInterface $connectors, array $dataAccessConfig = []) use ($injector) {
+                $storageWriters = isset($dataAccessConfig['storage_writers'])
+                    ? $dataAccessConfig['storage_writers']
+                    : [];
+                $storageWriters = array_merge(self::$defaultWriters, $storageWriters);
+                return $this->initStorageMap(new StorageWriterMap, $storageWriters, $connectors, $injector);
             }
         )->share(StorageWriterMap::CLASS);
         $this->registerUowMapDelegate($injector);
 
         $injector->delegate(
             FinderMap::CLASS,
-            function (ConnectorServiceInterface $connectors, array $finders = []) use ($injector) {
-                $configs = array_merge(self::$defaultFinders, $finders);
-                return $this->initStorageMap(new FinderMap, $configs, $connectors, $injector);
+            function (ConnectorServiceInterface $connectors, array $dataAccessConfig = []) use ($injector) {
+                $finders = isset($dataAccessConfig['finders']) ? $dataAccessConfig['finders'] : [];
+                $finders = array_merge(self::$defaultFinders, $finders);
+                return $this->initStorageMap(new FinderMap, $finders, $connectors, $injector);
             }
         )->share(FinderMap::CLASS);
         $this->registerQueryServiceMapDelegate($injector);
@@ -116,9 +123,10 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
             function (
                 StorageWriterMap $storageWriterMap,
                 StorageReaderMap $storageReaderMap,
-                array $unitOfWorks = []
+                array $dataAccessConfig = []
             ) use ($injector) {
                 $map = new UnitOfWorkMap;
+                $unitOfWorks = isset($dataAccessConfig['unit_of_works']) ? $dataAccessConfig['unit_of_works'] : [];
                 foreach ($unitOfWorks as $uowKey => $uowConf) {
                     $objectState = [
                         ':config' => new ArrayConfig(isset($uowConf['settings']) ? $uowConf['settings'] : []),
@@ -141,7 +149,8 @@ class DataAccessServiceConfiguration implements ConfigurationInterface
     {
         $injector->delegate(
             QueryServiceMap::CLASS,
-            function (FinderMap $finderMap, array $queryServices = []) use ($injector) {
+            function (FinderMap $finderMap, array $dataAccessConfig = []) use ($injector) {
+                $queryServices = isset($dataAccessConfig['query_services']) ? $dataAccessConfig['query_services'] : [];
                 $queryServiceMap = new QueryServiceMap;
                 foreach ($queryServices as $serviceKey => $qsConf) {
                     $finderMappings = [];

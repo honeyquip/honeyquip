@@ -3,12 +3,10 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Util\StringToolkit;
-use Honeybee\FrameworkBinding\Equip\Crate\CrateInterface;
 use Honeybee\Infrastructure\DataAccess\Connector\GuzzleConnector;
 
-class ConnectorConfiguration implements ConfigurationInterface
+class ConnectorConfiguration extends Configuration
 {
     protected static $connectorTemplates = [
         'event_source' => [
@@ -23,13 +21,6 @@ class ConnectorConfiguration implements ConfigurationInterface
         ]
     ];
 
-    protected $crate;
-
-    public function __construct(CrateInterface $crate)
-    {
-        $this->crate = $crate;
-    }
-
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $crateConnectors = []) use ($injector) {
@@ -40,7 +31,8 @@ class ConnectorConfiguration implements ConfigurationInterface
                 StringToolkit::asSnakeCase($this->crate->getName())
             );
             $crateConnectors[$this->crate->getPrefix().'.event_source'] = $connDef;
-            // $connectionConfigs will be merged in later by the ConnectorServiceConfiguration
+
+            $crateConnectors = ($this->builder) ? $this->builder->build($crateConnectors) : $crateConnectors;
             $injector->defineParam('crateConnectors', $crateConnectors);
         });
     }

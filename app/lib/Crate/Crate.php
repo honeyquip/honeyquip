@@ -9,6 +9,12 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Honeybee\Common\Error\RuntimeError;
 use Honeybee\Common\Util\StringToolkit;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\CommandBusConfiguration;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\ConnectorConfiguration;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\DataAccessConfiguration;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\MigrationConfiguration;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\PlatesConfiguration;
+use Honeybee\FrameworkBinding\Equip\Configuration\Crate\ResourceTypeConfiguration;
 use Honeybee\FrameworkBinding\Equip\Crate\EntityTypeLoaderInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
@@ -25,9 +31,7 @@ abstract class Crate implements CrateInterface
 
     private $projectionTypeMap;
 
-    abstract protected function provideConfiguration();
-
-    abstract protected function provideRoutes();
+    private $routes = [];
 
     public function __construct(
         CrateManifestInterface $manifest,
@@ -41,11 +45,27 @@ abstract class Crate implements CrateInterface
         $this->projectionTypeMap = $this->typeLoader->loadProjectionTypes($this);
     }
 
+    protected function provideConfiguration()
+    {
+        $configs = [
+            'resource_type' => ResourceTypeConfiguration::forCrate($this),
+            'connector' => ConnectorConfiguration::forCrate($this),
+            'data_access' => DataAccessConfiguration::forCrate($this),
+            'migration' => MigrationConfiguration::forCrate($this),
+            'command_bus' => CommandBusConfiguration::forCrate($this),
+            'plates' => PlatesConfiguration::forCrate($this)
+        ];
+
+        return [ $this->routes, $configs ];
+    }
+
     public function configure(Injector $injector)
     {
-        $this->routes = $this->provideRoutes();
-        $configs = new ConfigurationSet($this->provideConfiguration());
-        $configs->apply($injector);
+        list($routes, $configs) = $this->provideConfiguration();
+        foreach ($configs as $configuration) {
+            $configuration->apply($injector);
+        }
+        $this->addRoutes($routes);
     }
 
     public function dispatch(ServerRequestInterface $request)
@@ -109,5 +129,10 @@ abstract class Crate implements CrateInterface
                 $collector->addRoute('GET', $this->getRoutePrefix().$path, $action);
             }
         });
+    }
+
+    protected function addRoutes(array $routes)
+    {
+        $this->routes = array_merge($this->routes, $routes);
     }
 }

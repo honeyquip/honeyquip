@@ -20,6 +20,7 @@ Equip\Application::build()
         Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\MigrationServiceConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\CommandBusConfiguration::class,
         Honeybee\FrameworkBinding\Equip\Configuration\PlatesConfiguration::class,
         Equip\Configuration\PayloadConfiguration::class,
         Equip\Configuration\PlatesResponderConfiguration::class,
