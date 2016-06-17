@@ -20,9 +20,9 @@ class Hello implements DomainInterface
 
     public function __invoke(array $input)
     {
-        $name = 'world';
+        $name = 'Cqrs plus Es app boilerplate based on honeybee and equip.';
         if (!empty($input['name'])) {
-            $name = $input['name'];
+            $name = 'Hello ' . $input['name'];
         }
 
         return $this->payload

@@ -1,10 +1,8 @@
 <?php
 
-// Include Composer autoloader
 require __DIR__ . '/../vendor/autoload.php';
 
 $context = 'web';
-$environment = 'development';
 
 Equip\Application::build()
     ->setConfiguration([
@@ -36,8 +34,8 @@ Equip\Application::build()
     ])
     ->setRouting(function (Equip\Directory $directory) {
         return $directory
-            ->get('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
-            ->post('/hello[/{name}]', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
+            ->get('/hello/{name}', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
+            ->get('/', Honeybee\FrameworkBinding\Equip\Endpoint\Hello::class)
         ;
     })
     ->run()

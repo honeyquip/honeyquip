@@ -1,18 +1,14 @@
 #!/usr/bin/env php
 <?php
 
-use Auryn\Injector;
-use Honeybee\FrameworkBinding\Equip\Console\App;
-
 require_once __DIR__.'/../vendor/autoload.php';
 
 set_time_limit(0);
 
-$context = 'web';
-$environment = 'development';
+$context = 'console';
 
-App::bootstrap(
-    new Injector,
+Honeybee\FrameworkBinding\Equip\Console\App::bootstrap(
+    new Auryn\Injector,
     [
         Equip\Configuration\AurynConfiguration::class,
         Equip\Configuration\DiactorosConfiguration::class,
