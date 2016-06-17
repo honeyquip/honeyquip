@@ -6,7 +6,7 @@ use Auryn\Injector;
 use Honeybee\Common\Util\StringToolkit;
 use Honeybee\Infrastructure\Migration\FileSystemLoader;
 
-class MigrationConfiguration extends Configuration
+class MigrationConfiguration extends CrateConfiguration
 {
     protected static $defaultTargets = [
         '%crate_prefix%::migration::event_source' => [
@@ -39,9 +39,11 @@ class MigrationConfiguration extends Configuration
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $migrationTargets = []) use ($injector) {
-            $migrationTargets = array_merge($migrationTargets, $this->replaceTplMarkers(self::$defaultTargets));
-            $migrationTargets = ($this->builder) ? $this->builder->build($migrationTargets) : $migrationTargets;
-            $injector->defineParam('migrationTargets', $migrationTargets);
+            $migrationTargets = array_merge_recursive(
+                $migrationTargets,
+                $this->replaceTplMarkers(self::$defaultTargets)
+            );
+            $injector->defineParam('migrationTargets', $this->builder->build($migrationTargets));
         });
     }
 

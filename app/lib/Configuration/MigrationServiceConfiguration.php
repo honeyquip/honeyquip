@@ -3,7 +3,6 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Error\ConfigError;
 use Honeybee\Infrastructure\Config\ArrayConfig;
 use Honeybee\Infrastructure\Migration\MigrationService;
@@ -11,7 +10,7 @@ use Honeybee\Infrastructure\Migration\MigrationServiceInterface;
 use Honeybee\Infrastructure\Migration\MigrationTarget;
 use Honeybee\Infrastructure\Migration\MigrationTargetMap;
 
-class MigrationServiceConfiguration implements ConfigurationInterface
+class MigrationServiceConfiguration extends Configuration
 {
     public function apply(Injector $injector)
     {
@@ -20,6 +19,7 @@ class MigrationServiceConfiguration implements ConfigurationInterface
                 MigrationTargetMap::class,
                 function (MigrationTargetMap $map) use ($injector) {
                     $injector->execute(function (array $migrationTargets = []) use ($injector, $map) {
+                        $migrationTargets = $this->builder->build($migrationTargets);
                         foreach ($migrationTargets as $targetName => $targetConfig) {
                             $loader = $this->buildMigrationLoader($injector, $targetConfig['migration_loader']);
                             $migrationTarget = $injector->make(MigrationTarget::class, [

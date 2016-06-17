@@ -6,7 +6,7 @@ use Auryn\Injector;
 use Honeybee\Common\Util\StringToolkit;
 use Honeybee\Infrastructure\DataAccess\Connector\GuzzleConnector;
 
-class ConnectorConfiguration extends Configuration
+class ConnectorConfiguration extends CrateConfiguration
 {
     protected static $connectorTemplates = [
         'event_source' => [
@@ -23,17 +23,15 @@ class ConnectorConfiguration extends Configuration
 
     public function apply(Injector $injector)
     {
-        $injector->execute(function (array $crateConnectors = []) use ($injector) {
+        $injector->execute(function (array $connectors = []) use ($injector) {
             $connDef = self::$connectorTemplates['event_source'];
             $connDef['settings']['database'] = sprintf(
                 '%s-%s',
                 StringToolkit::asSnakeCase($this->crate->getVendor()),
                 StringToolkit::asSnakeCase($this->crate->getName())
             );
-            $crateConnectors[$this->crate->getPrefix().'.event_source'] = $connDef;
-
-            $crateConnectors = ($this->builder) ? $this->builder->build($crateConnectors) : $crateConnectors;
-            $injector->defineParam('crateConnectors', $crateConnectors);
+            $connectors[$this->crate->getPrefix().'.event_source'] = $connDef;
+            $injector->defineParam('connectors', $this->builder->build($connectors));
         });
     }
 }

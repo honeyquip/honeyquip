@@ -4,7 +4,7 @@ namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
 
-class ResourceTypeConfiguration extends Configuration
+class ResourceTypeConfiguration extends CrateConfiguration
 {
     public function apply(Injector $injector)
     {

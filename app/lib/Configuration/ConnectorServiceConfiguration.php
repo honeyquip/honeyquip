@@ -3,7 +3,6 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Error\ConfigError;
 use Honeybee\Infrastructure\Config\ArrayConfig;
 use Honeybee\Infrastructure\DataAccess\Connector\ConnectorMap;
@@ -16,7 +15,7 @@ use Honeybee\Infrastructure\DataAccess\Connector\RabbitMqConnector;
 use Honeybee\Infrastructure\DataAccess\Connector\SwiftMailer\LocalSendmailConnector;
 use Honeybee\Infrastructure\DataAccess\Connector\SwiftMailer\NullConnector;
 
-class ConnectorServiceConfiguration implements ConfigurationInterface
+class ConnectorServiceConfiguration extends Configuration
 {
     protected static $defaultConnectors = [
         'honeybee.view_store' => [
@@ -77,9 +76,10 @@ class ConnectorServiceConfiguration implements ConfigurationInterface
             ->alias(ConnectorServiceInterface::class, ConnectorService::class);
     }
 
-    public function registerConnectors(Injector $injector, array $crateConnectors, ConnectorMap $connectorMap)
+    public function registerConnectors(Injector $injector, array $connectors, ConnectorMap $connectorMap)
     {
-        foreach (array_merge(self::$defaultConnectors, $crateConnectors) as $name => $config) {
+        $connectors = $this->builder->build(array_merge_recursive(self::$defaultConnectors, $connectors));
+        foreach ($connectors as $name => $config) {
             $connector = $config['class'];
             if (!class_exists($connector)) {
                 throw new ConfigError(sprintf('Unable to load configured connector class: %s', $connector));

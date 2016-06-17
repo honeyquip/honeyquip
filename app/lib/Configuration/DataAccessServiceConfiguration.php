@@ -3,7 +3,6 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Common\Error\ConfigError;
 use Honeybee\Infrastructure\Config\ArrayConfig;
 use Honeybee\Infrastructure\DataAccess\Connector\ConnectorServiceInterface;
@@ -23,7 +22,7 @@ use Honeybee\Infrastructure\DataAccess\Storage\StorageWriterMap;
 use Honeybee\Infrastructure\DataAccess\UnitOfWork\UnitOfWorkMap;
 use Trellis\Common\Collection\Map;
 
-class DataAccessServiceConfiguration implements ConfigurationInterface
+class DataAccessServiceConfiguration extends Configuration
 {
     protected static $defaultReaders = [
         'honeybee.core::process_state::process_store::reader' => [

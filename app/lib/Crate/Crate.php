@@ -18,6 +18,7 @@ use Honeybee\FrameworkBinding\Equip\Configuration\Crate\ResourceTypeConfiguratio
 use Honeybee\FrameworkBinding\Equip\Crate\EntityTypeLoaderInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
+use Shrink0r\Monatic\Many;
 
 abstract class Crate implements CrateInterface
 {
@@ -45,27 +46,10 @@ abstract class Crate implements CrateInterface
         $this->projectionTypeMap = $this->typeLoader->loadProjectionTypes($this);
     }
 
-    protected function provideConfiguration()
-    {
-        $configs = [
-            'resource_type' => ResourceTypeConfiguration::forCrate($this),
-            'connector' => ConnectorConfiguration::forCrate($this),
-            'data_access' => DataAccessConfiguration::forCrate($this),
-            'migration' => MigrationConfiguration::forCrate($this),
-            'command_bus' => CommandBusConfiguration::forCrate($this),
-            'plates' => PlatesConfiguration::forCrate($this)
-        ];
-
-        return [ $this->routes, $configs ];
-    }
-
     public function configure(Injector $injector)
     {
-        list($routes, $configs) = $this->provideConfiguration();
-        foreach ($configs as $configuration) {
-            $configuration->apply($injector);
-        }
-        $this->addRoutes($routes);
+        list($this->routes, $configuration) = $this->provideConfiguration();
+        Many::unit($configuration)->apply($injector);
     }
 
     public function dispatch(ServerRequestInterface $request)
@@ -131,8 +115,17 @@ abstract class Crate implements CrateInterface
         });
     }
 
-    protected function addRoutes(array $routes)
+    protected function provideConfiguration()
     {
-        $this->routes = array_merge($this->routes, $routes);
+        $configs = [
+            'resource_type' => new ResourceTypeConfiguration($this),
+            'connector' => new ConnectorConfiguration($this),
+            'data_access' => new DataAccessConfiguration($this),
+            'migration' => new MigrationConfiguration($this),
+            'command_bus' => new CommandBusConfiguration($this),
+            'plates' => new PlatesConfiguration($this)
+        ];
+
+        return [ $this->routes, $configs ];
     }
 }

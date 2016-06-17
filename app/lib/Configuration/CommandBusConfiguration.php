@@ -3,14 +3,13 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\Infrastructure\Command\Bus\CommandBus;
 use Honeybee\Infrastructure\Command\Bus\CommandBusInterface;
 use Honeybee\Infrastructure\Command\Bus\Subscription\LazyCommandSubscription;
 use Honeybee\Infrastructure\Command\Bus\Transport\JobQueueTransport;
 use Honeybee\Infrastructure\Command\Bus\Transport\SynchronousTransport;
 
-class CommandBusConfiguration implements ConfigurationInterface
+class CommandBusConfiguration extends Configuration
 {
     protected static $defaultConfig = [
         'transports' => [
@@ -31,7 +30,10 @@ class CommandBusConfiguration implements ConfigurationInterface
     {
         $factory = function (CommandBusInterface $commandBus) use ($injector) {
             $injector->execute(function (array $commandBusConfig = []) use ($injector, $commandBus) {
-                $this->prepareCommandBus($injector, $commandBus, array_merge(self::$defaultConfig, $commandBusConfig));
+                $commandBusConfig = $this->builder->build(
+                    array_merge_recursive(self::$defaultConfig, $commandBusConfig)
+                );
+                $this->prepareCommandBus($injector, $commandBus, $commandBusConfig);
             });
         };
 

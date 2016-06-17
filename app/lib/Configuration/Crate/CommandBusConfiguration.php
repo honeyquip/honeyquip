@@ -4,7 +4,7 @@ namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
 
 use Auryn\Injector;
 
-class CommandBusConfiguration extends Configuration
+class CommandBusConfiguration extends CrateConfiguration
 {
     protected static $defaultConfig = [
         'transports' => [],
@@ -14,7 +14,7 @@ class CommandBusConfiguration extends Configuration
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $commandBusConfig = []) use ($injector) {
-            $commandBusConfig = ($this->builder) ? $this->builder->build($commandBusConfig) : $commandBusConfig;
+            $commandBusConfig = $this->builder->build(array_merge_recursive(self::$defaultConfig, $commandBusConfig));
             $injector->defineParam('commandBusConfig', $commandBusConfig);
         });
     }

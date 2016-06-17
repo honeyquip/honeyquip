@@ -23,7 +23,23 @@ class ConfigBag implements ConfigBagInterface
         do {
             $key = array_shift($pathParts);
             $value = $value->get($key);
-        } while (!empty($pathParts));
+        } while ($value && !empty($pathParts));
+
+        return ($value instanceof Settings) ? (array)$value : ($value ?: $default);
+    }
+
+    protected function resolveValue($setting)
+    {
+        $pathParts = explode('.', $setting);
+        $value = $this->config;
+        do {
+            $key = array_shift($pathParts);
+            $value = $value->resolveValue($key);
+        } while ($value instanceof Settings && !empty($pathParts));
+
+        if (!empty($pathParts)) {
+            return null;
+        }
 
         return $value;
     }

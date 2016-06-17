@@ -1,10 +1,8 @@
 <?php
 
-namespace Honeybee\FrameworkBinding\Equip\Configuration\Crate;
+namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
-use ArrayAccess;
-
-class ConfigBuilder implements ArrayAccess
+class ConfigBuilder implements ConfigBuilderInterface
 {
     protected $config;
 
@@ -21,7 +19,7 @@ class ConfigBuilder implements ArrayAccess
 
     public function build(array $config)
     {
-        return array_merge_recursive($config, $this->config);
+        return array_replace_recursive($config, $this->config);
     }
 
     public function valueOf($key)

@@ -19,7 +19,7 @@ use Honeybee\Infrastructure\DataAccess\Storage\Elasticsearch\StructureVersionLis
 use Honeybee\Infrastructure\DataAccess\UnitOfWork\UnitOfWork;
 use Honeybee\Projection\ProjectionTypeInterface;
 
-class DataAccessConfiguration extends Configuration
+class DataAccessConfiguration extends CrateConfiguration
 {
     protected static $defaultWriters = [
         '%crate_prefix%::version_list::event_source::writer' => [
@@ -140,27 +140,27 @@ class DataAccessConfiguration extends Configuration
     public function apply(Injector $injector)
     {
         $injector->execute(function (array $dataAccessConfig = []) use ($injector) {
-            $dataAccessConfig['storage_readers'] = array_merge(
+            $dataAccessConfig['storage_readers'] = array_merge_recursive(
                 isset($dataAccessConfig['storage_readers']) ? $dataAccessConfig['storage_readers'] : [],
                 $this->getStorageReaderConfigs($injector)
             );
-            $dataAccessConfig['storage_writers'] = array_merge(
+            $dataAccessConfig['storage_writers'] = array_merge_recursive(
                 isset($dataAccessConfig['storage_writers']) ? $dataAccessConfig['storage_writers'] : [],
                 $this->getStorageWriterConfigs($injector)
             );
-            $dataAccessConfig['finders'] = array_merge(
+            $dataAccessConfig['finders'] = array_merge_recursive(
                 isset($dataAccessConfig['finders']) ? $dataAccessConfig['finders'] : [],
                 $this->getFinderConfigs($injector)
             );
-            $dataAccessConfig['query_services'] = array_merge(
+            $dataAccessConfig['query_services'] = array_merge_recursive(
                 isset($dataAccessConfig['query_services']) ? $dataAccessConfig['query_services'] : [],
                 $this->getQueryServiceConfigs($injector)
             );
-            $dataAccessConfig['unit_of_works'] = array_merge(
+            $dataAccessConfig['unit_of_works'] = array_merge_recursive(
                 isset($dataAccessConfig['unit_of_works']) ? $dataAccessConfig['unit_of_works'] : [],
                 $this->getUnitOfWorkConfigs($injector)
             );
-            $injector->defineParam('dataAccessConfig', $dataAccessConfig);
+            $injector->defineParam('dataAccessConfig', $this->builder->build($dataAccessConfig));
         });
     }
 

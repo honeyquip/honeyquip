@@ -3,13 +3,12 @@
 namespace Honeybee\FrameworkBinding\Equip\Configuration;
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationInterface;
 use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBag;
 use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBagInterface;
 use Honeybee\FrameworkBinding\Equip\ConfigBag\ConfigBagLoaderInterface;
 use Honeybee\FrameworkBinding\Equip\ConfigBag\YamlFileLoader;
 
-class ConfigBagConfiguration implements ConfigurationInterface
+class ConfigBagConfiguration extends Configuration
 {
     public function apply(Injector $injector)
     {
@@ -25,11 +24,11 @@ class ConfigBagConfiguration implements ConfigurationInterface
                     $config['app_dir'] = dirname(dirname($configs['core']));
                     $config['core_dir'] = dirname(dirname($configs['core']));
                     if (isset($configs['app'])) {
-                        $config = array_merge($config, $loader->load($configs['app']));
+                        $config = array_merge_recursive($config, $loader->load($configs['app']));
                         $config['app_dir'] = dirname(dirname($configs['app']));
                     }
 
-                    return new ConfigBag($this->interpolateConfigValues($config));
+                    return new ConfigBag($this->builder->build($this->interpolateConfigValues($config)));
                 }
             );
     }
