@@ -2,61 +2,48 @@
 <?php
 
 use Auryn\Injector;
-use Equip\Configuration\ConfigurationSet;
 use Honeybee\FrameworkBinding\Equip\Console\App;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\CrateInfo;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\ListCrates;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\MakeCrate;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Crate\RemoveCrate;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\ListTargets;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateDown;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateUp;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\TargetInfo;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\GenerateCode;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ListResources;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\MakeResource;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\RemoveResource;
-use Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ResourceInfo;
-use Symfony\Component\Console\Input\ArgvInput;
-
-$appContext = 'console';
-$localConfigDir = getenv('LOCAL_CONFIG_DIR') ?: '/usr/local/honeylex.local/';
-$appCommands = [
-    // Crate
-    CrateInfo::CLASS,
-    ListCrates::CLASS,
-    MakeCrate::CLASS,
-    RemoveCrate::CLASS,
-    // Migrate
-    ListTargets::CLASS,
-    MigrateDown::CLASS,
-    MigrateUp::CLASS,
-    TargetInfo::CLASS,
-    // Resource
-    GenerateCode::CLASS,
-    ListResources::CLASS,
-    MakeResource::CLASS,
-    RemoveResource::CLASS,
-    ResourceInfo::CLASS
-];
 
 require_once __DIR__.'/../vendor/autoload.php';
 
 set_time_limit(0);
 
-$appEnv = (new ArgvInput)->getParameterOption([ '--env', '-e' ], getenv('APP_ENV') ?: 'dev');
+$context = 'web';
+$environment = 'development';
 
-$app = new App($appCommands, new Injector, new ConfigurationSet([
-    Equip\Configuration\AurynConfiguration::class,
-    Equip\Configuration\DiactorosConfiguration::class,
-    Equip\Configuration\EnvConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\ConfigBagConfiguration::class,
-    Equip\Configuration\MonologConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\AggregateRootTypeMapConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\ProjectionTypeMapConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
-    Honeybee\FrameworkBinding\Equip\Configuration\MigrationServiceConfiguration::class
-]));
-$app->run();
+App::bootstrap(
+    new Injector,
+    [
+        Equip\Configuration\AurynConfiguration::class,
+        Equip\Configuration\DiactorosConfiguration::class,
+        Equip\Configuration\EnvConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\ConfigBagConfiguration::customize(function ($config) {
+            return $config->app_version('dev-master (cli)');
+        }),
+        Equip\Configuration\MonologConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\CrateConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\AggregateRootTypeMapConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\ProjectionTypeMapConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\ConnectorServiceConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\DataAccessServiceConfiguration::class,
+        Honeybee\FrameworkBinding\Equip\Configuration\MigrationServiceConfiguration::class
+    ],
+    [
+        // Crate commands
+        Honeybee\FrameworkBinding\Equip\Console\Command\Crate\CrateInfo::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Crate\ListCrates::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Crate\MakeCrate::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Crate\RemoveCrate::class,
+        // Migrate commands
+        Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\ListTargets::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateDown::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\MigrateUp::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Migrate\TargetInfo::class,
+        // Resource commands
+        Honeybee\FrameworkBinding\Equip\Console\Command\Resource\GenerateCode::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ListResources::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Resource\MakeResource::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Resource\RemoveResource::class,
+        Honeybee\FrameworkBinding\Equip\Console\Command\Resource\ResourceInfo::class
+    ]
+)->run();

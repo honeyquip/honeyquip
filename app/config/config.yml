@@ -1,4 +1,5 @@
 ---
+app_version: dev-master
 app_name: honeyquip
 app_description: Cqrs and es app boilerplate based on equip
 

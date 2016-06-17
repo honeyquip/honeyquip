@@ -5,7 +5,6 @@ require __DIR__ . '/../vendor/autoload.php';
 
 $context = 'web';
 $environment = 'development';
-$appDir = dirname(__DIR__);
 
 Equip\Application::build()
     ->setConfiguration([
